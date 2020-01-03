@@ -1,6 +1,53 @@
-# codeigniter v3.x hmvc pro
+<p align="center">
+    <a href="https://codeigniter.com/" target="_blank">
+        <img src="https://codeigniter.com/assets/images/ci-logo-big.png" height="100px">
+    </a>
+    <h1 align="center">codeigniter v3.x hmvc pro</h1>
+    <br>
+</p>
 
+
+# codeigniter v3.x hmvc pro
 CodeIgniter 3.x pro with HMVC (With ORM and PHP helber and main libraries for improve code optimisations)
+
+
+Features
+--------
+
+- ***PSR-7** standardization*
+
+- ***RESTful API** implementation*
+
+- ***Laravel Resource Controllers** pattern like* 
+
+---
+
+OUTLINE
+-------
+
+- [Demonstration](#demonstration)
+    - [RESTful Create Callback](#restful-create-callback)
+    - [Packed Standard Format](#packed-standard-format)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+    - [Routes Setting](#routes-setting)
+- [Resource Controllers](#resource-controllers)
+    - [Build Methods](#build-methods)
+    - [Custom Routes & Methods](#custom-routes--methods)
+    - [Behaviors](#behaviors)
+    - [Usage](#usage)
+- [HTTP Request](#http-request)
+    - [Usage](#usage-1)
+- [HTTP Response](#http-response)
+    - [Usage](#usage-2)
+- [Reference](#reference)
+
+---
+
+
+
+
 
 
 # Modular Extensions - HMVC
@@ -32,6 +79,7 @@ Module Controllers can be used as normal Controllers or HMVC Controllers and the
 11- Move view application/views/welcome_message.php to application/modules/welcome/views/welcome_message.php
 
 12- Access the URL /index.php/welcome => shows Welcome to CodeIgniter
+
 You should now have a running Modular Extensions installation.
 
 # Installation Guide Hints:
