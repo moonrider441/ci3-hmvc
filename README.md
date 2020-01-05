@@ -30,14 +30,18 @@ OUTLINE
 
 - [Modular Extensions - HMVC](#modular-extensions---hmvc)
     - [Modular Extensions installation](#modular-extensions-installation)
+    - [Installation Guide Hints](#installation-guide-hints)
     - [Source Modular Extensions](#source-modular-extensions)
 - [MINI ORM](#mini-orm)
     - [Definition](#definition)
     - [Query Builder](#query-builder)
     - [Validate data](#validate-data)
     - [Auto Save (Insert OR Update)](#automatic-save-insert-or-update)
-    - [Manually Save (Insert OR Update)](#ئanually-save-insert-or-update)
+    - [Manually Save (Insert OR Update)](#manually-save-insert-or-update)
     - [Delete data](#delete-data)
+    - [MINI ORM installation](#mini-orm-installation)
+- [Smarty](#smarty)
+    - [Source Smarty integration](#source-smarty-integration)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -62,7 +66,7 @@ Modular Extensions makes the CodeIgniter PHP framework modular. Modules are grou
 HMVC stands for Hierarchical Model View Controller.
 Module Controllers can be used as normal Controllers or HMVC Controllers and they can be used as widgets to help you build view partials.
 
-# Modular Extensions installation
+## Modular Extensions installation
 1- Start with a clean CI install
 
 2- Set $config[‘base_url’] correctly for your installation
@@ -89,10 +93,6 @@ Module Controllers can be used as normal Controllers or HMVC Controllers and the
 
 You should now have a running Modular Extensions installation.
 
-## Source Modular Extensions
-<a href="https://bitbucket.org/wiredesignz/codeigniter-modular-extensions-hmvc/" target="_blank">Wiredesignz</a>
-
-
 ## Installation Guide Hints:
 -Steps 1-3 tell you how to get a standard CI install working - if you have a clean/tested CI install, skip to step 4.
 
@@ -101,6 +101,10 @@ You should now have a running Modular Extensions installation.
 -Steps 6-8 show MX working alongside CI - controller moved to the “welcome” module, the view file remains in the CI application/views directory - MX can find module resources in several places, including the application directory.
 
 -Steps 9-11 show MX working with both controller and view in the “welcome” module - there should be no files in the application/controllers or application/views directories.
+
+
+## Source Modular Extensions
+<a href="https://bitbucket.org/wiredesignz/codeigniter-modular-extensions-hmvc/" target="_blank">Wiredesignz</a>
 
 
 # MINI ORM
@@ -138,7 +142,8 @@ Class User_model extends MP_Model
 </pre>
 
 ## Query Builder
-you can get any model data by passing array params
+you can get any model data by passing array params to "get_row" or "get_rows" or other method.
+
 <pre>
     function get_data(){
     
@@ -157,7 +162,8 @@ you can get any model data by passing array params
         $params['order'] = [['user_id'=>'desc'],['user_fullname'=>'asc']];
         $params['group'] = ['user_id', 'product_id'];
         
-        $this->get_rows('ci_user t1', $params);
+	// call user table without prefix table. / you can defie prefix in database.php in config folder of ci
+        $this->get_rows('user t1', $params);
         
         // or get data by write your query
         $this->query('SELECT user_name FROM ci_user WHERE ...');
@@ -167,6 +173,10 @@ you can get any model data by passing array params
         
         // get count of data in table
         $this->count_all('user_table');
+	
+	.
+	.
+	.
     }
 }
 </pre>
@@ -181,7 +191,7 @@ validation of posted data and fill table fields in class just by calling method 
 </pre>
 
 ## Auto Save (Insert OR Update)
-you can insert or update your posted data from client by identify ident
+you can insert or update your posted data from client by identify ident automaticlly
 - First you have to call user model and run initiallize method "intro($id)" for check insert or update mode in your controller. if you pass null or 0 for "$id" arg, means you want to insert data, else if you pass identify ident like 1 for "$id", means you want to update your row with your custom identify. 
 - Second call "do_validate" for validation posted data and fill model variables;
 - At last if you have no error, call "save()" method;
@@ -210,6 +220,11 @@ class User extends MX_Controller
 
 		    // if we dont have any error => save data
 		    $this->mdl->save();
+	    	}
+		else 
+		.
+		.
+		.
         }
 </pre>
 
@@ -246,7 +261,7 @@ Class User_model extends MP_Model
 		
 		// if some data was null value and you want to save the null value in database, set "$NULL_value" arg => true 
 		$NULL_value = true;
-		// if you want to remove data where has null value, set "$NULL_value" arg => false
+		// if you want to remove data that has null value, set "$NULL_value" arg => false
 		$NULL_value = false;
 		
 		// Call method for execute your query (insert or update)
@@ -280,5 +295,27 @@ class User extends MX_Controller
 		$this->mdl->delete(['product_id'=>20], 'product_table');
         }
 </pre>
+
+
+## MINI ORM installation
+
+1- Copy MP_Model in "application -> core"
+
+2- Create your model and extend to "MP_Model"
+
+3- Read and do the [Definition] instructions (Create table fields variable, table name variable, identify variable , ...)
+
+4- Your model synced up with mini ORM and you can use all method easily.
+
+
+#  Smarty
+
+Integrate Smarty into your Codeigniter applications.
+We choosed Smarty template engine for developers, because it's powerful, easy use and popular in search engines.
+
+## Source Smarty integration
+<a href="https://github.com/Vheissu/Ci-Smarty" target="_blank">Vheissu</a>
+
+
 
 
