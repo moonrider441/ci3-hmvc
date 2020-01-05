@@ -28,15 +28,16 @@ Features
 OUTLINE
 -------
 
-- [Modular Extensions - HMVC](#Modular-Extensions---HMVC)
-    - [Modular Extensions installation](#Modular-Extensions-installation)
-    - [Source Modular Extensions](#Source-Modular-Extensions)
-- [MINI ORM](#MINI-ORM)
-    - [Definition](#Definition)
-    - [Query Builder](#Query-Builder)
-    - [Validate data](#Validate-data)
-    - [Automatic Save (Insert OR Update)](#packed-standard-format)
-    - [Delete](#Delete)
+- [Modular Extensions - HMVC](#modular-extensions---hmvc)
+    - [Modular Extensions installation](#modular-extensions-installation)
+    - [Source Modular Extensions](#source-modular-extensions)
+- [MINI ORM](#mini-orm)
+    - [Definition](#definition)
+    - [Query Builder](#query-builder)
+    - [Validate data](#validate-data)
+    - [Auto Save (Insert OR Update)](#automatic-save-insert-or-update)
+    - [Manually Save (Insert OR Update)](#ئanually-save-insert-or-update)
+    - [Delete data](#delete-data)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -179,10 +180,11 @@ validation of posted data and fill table fields in class just by calling method 
         $errors = $this->do_validate();
 </pre>
 
-## Automatic Save (Insert OR Update)
-you can insert your data posted from form or update the user row by identify ident
-- First you have to call user model and run initiallize method for check insert or update mode in your controller.
--
+## Auto Save (Insert OR Update)
+you can insert or update your posted data from client by identify ident
+- First you have to call user model and run initiallize method "intro($id)" for check insert or update mode in your controller. if you pass null or 0 for "$id" arg, means you want to insert data, else if you pass identify ident like 1 for "$id", means you want to update your row with your custom identify. 
+- Second call "do_validate" for validation posted data and fill model variables;
+- At last if you have no error, call "save()" method;
 
 <pre>
 class User extends MX_Controller
@@ -190,24 +192,92 @@ class User extends MX_Controller
 	function __construct()
 	{
 		parent::__construct();
-        $this->parser->setModule('admin');
-    }
+		$this->parser->setModule('admin');
+	}
     
-    function register($id=0) {
+	function register($id=0) {
     
-        // load user model
-        $this->load->model('user_model', 'mdl');
-        
-        // run initiallize core model / check if $id=0 then "insert" else "update"
-        $this->mdl->intro($id);
-        
-        //validate posted data from client 
-        $errors = $this->mdl->do_validate();
+		// load user model
+		$this->load->model('user_model', 'mdl');
 
-        if(empty($errors)){
-        
-            // if we dont have any error => save data
-            $this->mdl->save();
+		// run initiallize core model / check if $id=0 then "insert" else "update"
+		$this->mdl->intro($id);
+
+		//validate posted data from client 
+		$errors = $this->mdl->do_validate();
+
+		if(empty($errors)){
+
+		    // if we dont have any error => save data
+		    $this->mdl->save();
+        }
+</pre>
+
+## Manually Save (Insert OR Update)
+If you need insert or update data in your database manually, you can call method "execute($params, $table_name=null,$WHERE=null, $NULL_value=false)"
+
+<pre>
+Class User_model extends MP_Model
+{
+	function __construct()
+	{
+		parent::__construct();
+		$this->parser->setModule('admin');
+	}
+		
+    	public function save($NULL_VALUE = true){
+        	$this->id = parent::save($NULL_VALUE);
+		
+		// after save user => insert or update in other table
+		$this->manuallysave();
+	}
+    
+	function manuallysave() {
+    
+    		// set your data for insert or update in first arg "$params"
+    		$params = ['other_field'=>'data', 'other_field2'=>'data2', ...];
+		
+		// set you table name (if table is same as your model / in this sample "user_model" you can pass null to this arg)
+		$table_name = 'table_name';
+		
+		// if you want to insert, pass null to "$WHERE" arg or if you want to update, pass your conditions to "$WHERE" arg
+		$WHERE = null; // INSERT mode
+		$WHERE = ['sample_field'=>'data', ...]; // UPDATE mode
+		
+		// if some data was null value and you want to save the null value in database, set "$NULL_value" arg => true 
+		$NULL_value = true;
+		// if you want to remove data where has null value, set "$NULL_value" arg => false
+		$NULL_value = false;
+		
+		// Call method for execute your query (insert or update)
+		$this->execute($params, $table_name, $WHERE, $NULL_value);
+        }
+</pre>
+
+## Delete data
+For delete data we have "delete($where=array(), $table_name='default_model_table_name')" with two arg.
+- At first you have to fill your first arg "$where" in array mode like "['user_id'=>12]".
+- If you want to delete from other table in other model you have to pass second arg "$table_name".
+
+<pre>
+class User extends MX_Controller
+{
+	function __construct()
+	{
+		parent::__construct();
+		$this->parser->setModule('admin');
+	}
+    
+	function delete($id=0) {
+    
+		// load user model
+		$this->load->model('user_model', 'mdl');
+		
+		// delete user row WHERE => user_id=12
+		$this->mdl->delete(['user_id'=>12]);
+		
+		// delete from other table. sample:: a product row WHERE product_id=20
+		$this->mdl->delete(['product_id'=>20], 'product_table');
         }
 </pre>
 
