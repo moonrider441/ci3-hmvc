@@ -15,9 +15,15 @@ Features
 
 - ***MINI ORM** easy use to any query*
 
-- ***Smarty** strong, popular and easy template engine* 
+- ***PDM** perfesional development manager* 
 
 - ***Multi Language Support** translate to any lannguage you like* 
+
+- ***Smarty** strong, popular and easy template engine* 
+
+- ***Smart asset** category and customize your asset* 
+
+- ***Smart asset** category and customize your asset* 
 
 - ***List Builder** build your filterable list with bootstrap* 
 
@@ -27,6 +33,7 @@ Features
 
 OUTLINE
 -------
+
 
 - [Modular Extensions - HMVC](#modular-extensions---hmvc)
     - [Modular Extensions installation](#modular-extensions-installation)
@@ -40,6 +47,8 @@ OUTLINE
     - [Manually Save (Insert OR Update)](#manually-save-insert-or-update)
     - [Delete data](#delete-data)
     - [MINI ORM installation](#mini-orm-installation)
+- [PDM](#pdm)
+    - [Source Smarty integration](#source-smarty-integration)
 - [Smarty](#smarty)
     - [Source Smarty integration](#source-smarty-integration)
 - [Requirements](#requirements)
@@ -307,6 +316,86 @@ class User extends MX_Controller
 
 4- Your model synced up with mini ORM and you can use all method easily.
 
+
+#  PDM
+We called it perfesional development manager because you can manage your web application.
+
+request,assets,ajax ,smarty integration
+## Manage Assets
+
+<p>Manage assets for your all module page you have.</p>
+<p>we set 3 type to show asset those are gzip, compress and safe mode.</p>
+- ***gzip** compress with gzip algoritm.*
+- ***compress** compressing with remove free space of asset that we recommended to use for style-sheets.*
+- ***safe** not any compress method. that mean just remove the compressing proccess for this asset.*
+
+<p>either you can address your assets in 3 mode to load from current module or any where you want like core or other modules.</p>
+- ***me** that mean use base address from current module for this asset.*
+- ***home** that mean use base address from base or core assets in root of project. of course if you have this folder.*
+- ***module_name** each exist module you want to use for base address like shop or admin.*
+
+<p>We have simple sample here for shop module to show default asset and other page like "shop_product" that means shop controller and product function.</p>
+<p>You have to create "asset.php" file in config folder of each module and write like these codes..</p>
+<pre>
+<?php
+	$this->asset_bank = array(
+		'default'=>array(
+			'css' => array(
+				'type' => 'css',
+				'files' => array(
+					'vendor/bootstrap/css/bootstrap.min.css'=> 'safe@home',
+					'vendor/fontawesome-free/css/all.min.css'=>'safe@home',
+					'css/fonts-style/fonts.css'=>'comp@home',
+					'vendor/animate/animate.min.css'=> 'safe@home',
+					'vendor/owl.carousel/assets/owl.carousel.min.css'=> 'safe@home',
+					'vendor/owl.carousel/assets/owl.theme.default.min.css'=> 'safe@home',
+					'vendor/magnific-popup/magnific-popup.min.css'=> 'safe@home'
+				)
+			),
+			'js' => array(
+				'type' => 'js',
+				'files' => array(
+					'vendor/jquery/jquery.min.js'=>'safe@admin',
+					'vendor/jquery.appear/jquery.appear.min.js'=>'safe@admin',
+					'vendor/jquery.easing/jquery.easing.min.js'=>'safe@home',
+					'vendor/jquery.cookie/jquery.cookie.min.js'=>'safe@home',
+					'js/user_auth.js'=>'gzip@admin',
+				)
+			)
+		),
+		'shop_product'=> array(
+			'css' => array(
+				'type' => 'css',
+				'files' => array(
+					'css/front/skins/default.css'=> 'safe@me',
+					'css/front/custom.css'=> 'safe@me'
+				)
+			),
+			'js' => array(
+				'type' => 'js',
+				'files' => array(
+					'js/front/views/view.shop.js'=>'safe@me',
+					'js/front/custom.js'=>'safe@me',
+					'js/front/product_front.js'=>'safe@me',
+					'js/front/theme.init.js'=>'safe@me',
+				)
+			)
+		)
+		.
+		.
+		.
+</pre>
+
+
+
+
+Integrate Smarty into your Codeigniter applications.
+We choosed Smarty template engine for developers, because it's powerful, easy use and popular in search engines.
+
+## Source Smarty integration
+<a href="https://github.com/Vheissu/Ci-Smarty" target="_blank">Vheissu</a>
+
+- ***PDM** perfesional development manager* 
 
 #  Smarty
 
