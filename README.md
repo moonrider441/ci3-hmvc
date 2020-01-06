@@ -21,11 +21,7 @@ Features
 
 - ***Multi Language Support** translate to any lannguage you like* 
 
-- ***Smart asset** category and customize your asset* 
-
-- ***Smart asset** category and customize your asset* 
-
-- ***List Builder** build your filterable list with bootstrap* 
+- ***List Builder** build your filterable list with bootstrap structure* 
 
 - ***Helper Library** fast access to anything* 
 
@@ -468,6 +464,12 @@ class User extends MX_Controller
      < script src="{base_url('asset/home/vendor/modernizr/modernizr.min.js')}" type="text/javascript" ></ script >
 </pre>
 
+<p>Remember to add these line to your route in (application -> config).</p>
+
+<pre>
+$route['asset/(?!jc/)(.*)'] = $route['default_controller'].'/asset/$1';
+$route['asset/jc/([a-zA-Z]+)/(.*)'] = '$1/asset/$2';
+</pre>
 
 ## Ajax Requests
 
@@ -529,10 +531,9 @@ We choosed Smarty template engine for developers, because it's powerful, easy us
 
 # Multi Language Support
 
-<p>You need to set needle params in application directory "config.php" file.</p>
+<p>You need to set needle params in application directory "config.php" file like this sample.</p>
 
 <pre>
-
 /*
 |--------------------------------------------------------------------------
 | Default Language
@@ -563,6 +564,65 @@ $config['lang_ignore'] = TRUE;
 </pre>
 
 <p>if you set "lang_ignore" value true, the language segment in url automatically will be remove.</p>
+<p>You can manage the storage method in "MY_Lang.php" in (application -> core), but in default mode we save the language info in cookie.</p>
+
+<p>Remember to add these line to your route in (application -> config).</p>
+
+<pre>
+$route['(\w{2})/(.*)'] = '$2';
+$route['(\w{2})'] = $route['default_controller'];
+</pre>
+
+
+# List Builder
+
+<p>We Created a list builder with some features for control and getting report from data with any custom query</p>
+
+
+## Options
+
+<p>The List builder library has main option to initiallize.</p>
+
+<pre>
+array(
+		'table_ident'		=> 0, // number of table for separate multi tables in one page
+		'state'	 			=> 'database',// has two mode for handling data from "database" or "handler" custom array data
+		'data'	 	 		=> array(), // if you choose state => handler you need fill this param with your data
+		'fields'	 	 	=> '*', // for database mode you can call your fields.
+		'table' 		 	=> '',// for database mode table name
+		'title' 		 	=> '',// title of table 
+		'cols' 		  	 	=> array(), // column of table are define in this param
+		'last_row'	 	 	=> array(), // set function for handler custom last row like get sum of data
+		'ident' 		 	=> 'field_id', // identify of table
+		'where' 		 	=> '', // conditions of table that you have pass array where
+		'where_custom' 	 	=> '', // custom where is same as where field but you have to pass string where to this param
+		'order' 		 	=> array(),// set order by in query 
+		'group' 		 	=> '', // set group by in query
+		'search' 		 	=> array(),// search field
+		'action_link' 	 	=> array(	array('link'=>'edit/@id@','type'=>'edit'),array('link'=>'@id@','type'=>'delete')),
+		'action_form' 	 	=> 'list',
+		'action_form_custom'=> '',
+		'limit'          	=> 0, // limit for your select
+		'limit_box'      	=> true,
+		'before_delete'	 	=> 0,
+		'filter'	 	 	=> array(),//array('action'=>'field_name','html'=>'html_content')
+		'filter_box'	 	=> true,
+		'table_empty_first'	=> false,
+		'disable_form'		=> false,
+		'header_box'	 	=> true,
+		'header_text'	 	=> ' به منظور اضافه کردن سطر جدید از طریق لینک زیر اقدام کنید',
+		'header_button'	 	=> array(
+			array('txt'=>'<i class="fa fa-plus"></i> اضافه کردن سطر جدید', 'color'=>'primary', 'url'=>$this->module_path),
+			array('txt'=>'<i class="fa fa-trash"></i> حذف گروهی آیتم ها', 'color'=>'red', 'id'=>'delete-all', 'url'=>$this->module_path)
+		),
+		'field_checkbox'    => true,
+		'footer_box'	 	=> false,
+		'footer_text'	 	=> '',
+		'footer_button'	 	=> array()
+	);
+</pre>
+
+
 
 
 
