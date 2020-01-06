@@ -17,9 +17,9 @@ Features
 
 - ***PDM** perfesional development manager* 
 
-- ***Multi Language Support** translate to any lannguage you like* 
-
 - ***Smarty** strong, popular and easy template engine* 
+
+- ***Multi Language Support** translate to any lannguage you like* 
 
 - ***Smart asset** category and customize your asset* 
 
@@ -47,10 +47,14 @@ OUTLINE
     - [Manually Save (Insert OR Update)](#manually-save-insert-or-update)
     - [Delete data](#delete-data)
     - [MINI ORM installation](#mini-orm-installation)
-- [PDM](#pdm)
-    - [Source Smarty integration](#source-smarty-integration)
+- [PDM](#pdm)  
+    - [Manage Header & Footer](#manage-header-&-footer)
+    - [Manage Assets](#manage-assets)
+    - [Ajax Requests](#ajax-requests)
+    - [Rendering pages](#rendering-pages)
 - [Smarty](#smarty)
     - [Source Smarty integration](#source-smarty-integration)
+- [Multi Language Support](#multi-language-support)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -318,24 +322,66 @@ class User extends MX_Controller
 
 
 #  PDM
-We called it perfesional development manager because you can manage your web application.
+<p>We called it perfesional development manager because you can manage your web application.</p>
+<p>Here we see the features of this library.</p>
+<p>To run this library you have to define it in "autoload.php".</p>
 
-request,assets,ajax ,smarty integration
+<pre>
+	$autoload['libraries'] = array('pdm', ...);
+</pre>
+
+
+## Manage Header & Footer
+<p>Any page you have, can has custom header and footer that load automaticlly by PDM.</p>
+<p>You have to define header and footer in each modulde config folder -> "config.php" file.</p>
+<p>After that you can define your module page header and footer by this structure: </p>
+
+- "controller_function_header" for header
+
+- "controller_function_footer" for footer 
+
+<p>The value of each row has two section that seprate by "@pd@"</p>
+<p>First section are module name that you wanted to load header or footer from that.</p>
+<p>Second section are address of header or footer view in your project.</p>
+<p>If you dont set any page header or footer in config file, the PDM load default value of current module header or footer for that page.</p>
+
+<pre>
+<?php
+	$config['def_header'] = 'admin@pd@_header.tpl';
+	$config['def_footer'] = 'admin@pd@_footer.tpl';
+
+	$config['user_login_header'] = 'admin@pd@admin/_login_header.tpl';
+	$config['user_login_footer'] = 'admin@pd@admin/_login_footer.tpl';
+	.
+	.
+	.
+?>
+</pre>
+
 ## Manage Assets
 
-<p>Manage assets for your all module page you have.</p>
-<p>we set 3 type to show asset those are gzip, compress and safe mode.</p>
+<p>At first you have to create "asset.php" file in config folder of each module and write like these codes for all pages of your module.</p>
+<p>The value of each asset has two section that seprate by "@".</p>
+<p>First section are type of compressing mode that we have 3 type to compress and those are gzip, compress and safe mode.</p>
+
 - ***gzip** compress with gzip algoritm.*
+
 - ***compress** compressing with remove free space of asset that we recommended to use for style-sheets.*
+
 - ***safe** not any compress method. that mean just remove the compressing proccess for this asset.*
 
-<p>either you can address your assets in 3 mode to load from current module or any where you want like core or other modules.</p>
+
+<p>Second section are asset base module address that you can address your assets in 3 mode to load from current module or any where you want like core or other modules.</p>
+
 - ***me** that mean use base address from current module for this asset.*
+
 - ***home** that mean use base address from base or core assets in root of project. of course if you have this folder.*
+
 - ***module_name** each exist module you want to use for base address like shop or admin.*
 
-<p>We have simple sample here for shop module to show default asset and other page like "shop_product" that means shop controller and product function.</p>
-<p>You have to create "asset.php" file in config folder of each module and write like these codes..</p>
+
+<p>We have simple example from shop module is here that are default asset and another page "shop_product" that means shop controller and product function.</p>
+
 <pre>
 <?php
 	$this->asset_bank = array(
@@ -386,16 +432,91 @@ request,assets,ajax ,smarty integration
 		.
 </pre>
 
+<p>After you doing top setting, its time to show asset in view page of project.</p>
+<p>For showing Style sheet or javascript files we have to create address that connected to Assets library and load your custom asset.</p>
+<p>We have good news for you cause we done this addressing level in PDM library on "render_page()" method.</p>
+<p>The full address of assets in client has some parameter that help you to hide your file dir address and separate your asset request from other requests.</p>
+<p>You can use Assets library in 2 type view:</p>
+
+
+- <b>Using for combine several assets to one file.</b>
+
+<p>This type is combining form four segment</p>
+<p>First segment : "asset" is used for identification our request is for asset files.</p>
+<p>Second segment : "js" means we have a package of assets with different compression mode for Assets library. like admin module user page assets.</p>
+<p>Third segment : "module_name" means that current request come from this module. for example "admin" module.</p>
+<p>Fourth segment : "PageName_pd_css" this segment has two section that separate by "_pd_". first section is name of the module page that created at "module -> config -> asset.php" and  the second section is type of asset in this package like "css" or "js".</p>
+
+<pre>
+	 // look at this sample. we want to show "admin module -> admin controler -> user function" style sheet files.
+     < link rel="stylesheet" href="http://site.com/asset/jc/admin/admin_user_pd_css" / >
+	 
+	 // look at this sample. we want to show "admin module" default package javascript files.
+     < script src="http://site.com/asset/jc/admin/default_pd_js" type="text/javascript" ></ script >
+</pre>
+
+
+- <b>Using for just some files except other page assets and other place in page source. for example show "modernize.js" plugin in top of page.</b>
+
+<p>This type is combining form three segment</p>
+<p>First segment : "asset" is used for identification our request is for asset files.</p>
+<p>Second segment : "module_name" means file is belong to this module and if belong to core asset we use "home". for example "admin" module.</p>
+<p>Third segment : "address_path" is address path of file that start from asset folder in dir of module folder in second segment. for example "vendor/modernizr/modernizr.min.js".</p>
+
+<pre>
+	// look at this sample. we want to show a plugin js file in core assets (home) and "vendor/modernizr/modernizr.min.js" path.
+     < script src="{base_url('asset/home/vendor/modernizr/modernizr.min.js')}" type="text/javascript" ></ script >
+</pre>
+
+
+## Ajax Requests
+
+<p>We separate Ajax requests from other requests for improve loading speed and decrease bandwidth usage.</p>
+<p>Any Ajax request you want to send must having 2 parameter.</p>
+
+- ***First parameter: "ajax_type"** value of this parameter is telling us which module folder is destination of request.*
+
+- ***Second parameter: "p"** value of this parameter is telling us which php file is destination of request.*
+
+<pre>
+	// in this sample we want to send ajax request to "Shop" module and "admin_shop.php" file
+	$.getJSON('?ajax_type=shop&p=admin_shop', {...} ,function (rdata) { ... })
+</pre>
+
+<p>All of Ajax requests are handle in PDM library by "_ajax_route()" method.</p>
 
 
 
-Integrate Smarty into your Codeigniter applications.
-We choosed Smarty template engine for developers, because it's powerful, easy use and popular in search engines.
+## Rendering pages
 
-## Source Smarty integration
-<a href="https://github.com/Vheissu/Ci-Smarty" target="_blank">Vheissu</a>
+<p>For rendering page in your controller just call "render_page($view_name, $data)" from pdm library.</p>
 
-- ***PDM** perfesional development manager* 
+<pre>
+<?php 
+	class Shop extends MX_Controller
+	{
+	
+		function product(){
+			
+			.
+			.
+			.
+			
+			// Render "product.tpl" view with "$data" assigned data.
+			$this->pdm->render_page('product.tpl', $data);
+		}
+	}
+?>
+</pre>
+
+<p>In rendering method we have three level:</p>
+
+- ***First level:** Rendering the header of page.*
+
+- ***Second level:** Rendering the content of view page.*
+
+- ***Third level:** Rendering the footer of page.*
+
 
 #  Smarty
 
@@ -405,6 +526,43 @@ We choosed Smarty template engine for developers, because it's powerful, easy us
 ## Source Smarty integration
 <a href="https://github.com/Vheissu/Ci-Smarty" target="_blank">Vheissu</a>
 
+
+# Multi Language Support
+
+<p>You need to set needle params in application directory "config.php" file.</p>
+
+<pre>
+
+/*
+|--------------------------------------------------------------------------
+| Default Language
+|--------------------------------------------------------------------------
+|
+| This determines which set of language files should be used. Make sure
+| there is an available translation if you intend to use something other
+| than english.
+|
+*/
+$config['language']	= 'persian';
+
+/* default language abbreviation */
+$config['language_abbr'] = "fa";
+
+/* default language abbreviation direction */
+$config['language_dir'] = 'rtl';
+
+/* set available language abbreviations */
+$config['lang_uri_abbr'] =
+    [
+        "fa" => ["name"=>"persian", "ident"=>"fa", "dir"=>"rtl"],
+        "en" => ["name"=>"english", "ident"=>"en", "dir"=>"ltr"]
+    ];
+
+/* hide the language segment (use cookie) */
+$config['lang_ignore'] = TRUE;
+</pre>
+
+<p>if you set "lang_ignore" value true, the language segment in url automatically will be remove.</p>
 
 
 
