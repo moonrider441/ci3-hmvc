@@ -39,32 +39,27 @@ OUTLINE
     - [Definition](#definition)
     - [Query Builder](#query-builder)
     - [Validate data](#validate-data)
-    - [Auto Save (Insert OR Update)](#automatic-save-insert-or-update)
+    - [Auto Save (Insert OR Update)](#auto-save-insert-or-update)
     - [Manually Save (Insert OR Update)](#manually-save-insert-or-update)
     - [Delete data](#delete-data)
     - [MINI ORM installation](#mini-orm-installation)
 - [PDM](#pdm)  
-    - [Manage Header & Footer](#manage-header-&-footer)
+    - [Manage Header & Footer](#manage-header--footer)
     - [Manage Assets](#manage-assets)
     - [Ajax Requests](#ajax-requests)
     - [Rendering pages](#rendering-pages)
 - [Smarty](#smarty)
     - [Source Smarty integration](#source-smarty-integration)
 - [Multi Language Support](#multi-language-support)
+- [List Builder](#list-builder)
+    - [Options](#options)
+    - [All list Options](#all-list-options)
+- [Helper Library](#helper-library)
+    - [Tools Helper](#tools-helper)
+    - [Validation Helper](#validation-helper)
+    - [Persian Date Helper](#persian-date-helper)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Configuration](#configuration)
-    - [Routes Setting](#routes-setting)
-- [Resource Controllers](#resource-controllers)
-    - [Build Methods](#build-methods)
-    - [Custom Routes & Methods](#custom-routes--methods)
-    - [Behaviors](#behaviors)
-    - [Usage](#usage)
-- [HTTP Request](#http-request)
-    - [Usage](#usage-1)
-- [HTTP Response](#http-response)
-    - [Usage](#usage-2)
-- [Reference](#reference)
 
 ---
 
@@ -582,7 +577,493 @@ $route['(\w{2})'] = $route['default_controller'];
 ## Options
 
 <p>The List builder library has main option to initiallize.</p>
+<p>We have two "state" mode for using list builder:</p>
 
+- ***handler** - your data is array and dont need to fetch from database.*
+
+<pre>
+
+// Create list with Custom data
+	
+$this->load->library('pd_list', array(
+	'state' => 'handler',
+	'data' => [ 
+		['name'=>'afshin','id'=>1, 'phone'=>'913xxxxxxx'],
+		['name'=>'ali','id'=>2, 'phone'=>'912xxxxxxx'],
+		['name'=>'hadi','id'=>3, 'phone'=>'914xxxxxxx'],
+		['name'=>'mohamad','id'=>4, 'phone'=>'915xxxxxxx'],
+		['name'=>'rasool','id'=>5, 'phone'=>'916xxxxxxx']
+	],
+	'cols' => [
+		array('type' => 'field',
+			'name' => 'شناسه',
+			'action' => 'id',
+			'align' => 'center',
+			'width' => 90),
+		array('type' => 'field',
+			'name' => 'عنوان کاربر',
+			'action' => 'name',
+			'align' => 'center',
+			'width' => 150),
+		array('type' => 'field',
+			'name' => 'تلفن',
+			'action' => 'phone',
+			'align' => 'center',
+			'width' => 150)
+	],
+	'ident' => 'id',
+	'order' => ['name'=>'ASC', 'id'=>'DESC'],
+	'action_form' => 'mylist',
+	'search' => ['عنوان'=>'name', 'شناسه'=>'id'],
+	'limit' => '3'
+	)
+);
+
+// Render list with your params
+$user_list_content = $this->pd_list->render();
+</pre>
+
+- ***database** conneting to database and fetch data to build list. (default value is database)*
+
+<p>Let's see the most importants options of table that most of them are using in database mode:</p>
+
+
+### 1- fields
+
+<p>You can fetch your data with custom field from database for increase performance.</p>
+<p>If you leave this field, automaticlly will be set "*".</p>
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'fields' => 't1.user_id, t1.user_name, t2_user_detail_id, ...'
+		.
+		.
+		.
+</pre>
+
+
+### 2- table
+
+<p>You have to set your database table in this field. of course you can add your join here</p>
+<pre>
+$this->load->library('pd_list', array(
+		'state' => 'database',
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		.
+		.
+		.
+</pre>
+
+
+### 3- cols
+
+<p>we have two type column: "field" type that you can find value in data, or "function" type that you pass the data to another method in other model to calculate value.</p>
+<p>In function mode we pass row data to your method, of course you can pass your custom param too.</p>
+
+<pre>
+/*************************************/
+/************* Field type ************/
+/*************************************/
+$fields = [
+	[
+		'type' => 'field', // type of field
+		'name' => 'شناسه', // name you want to show
+		'action' => 'id', // name of data
+		'align' => 'center', // aligne placement
+		'width' => 90 // with of column
+	],
+	[
+		'type' => 'field',
+		'name' => 'عنوان کاربر',
+		'action' => 'name',
+		'align' => 'center',
+		'width' => 150
+	]
+];
+
+/*************************************/
+/********** Function type ************/
+/*************************************/
+$fields = [
+	[
+		'type' => 'function',
+		'name' => 'تصویر',
+		'function' => array("name" => 'get_user_thumbnail', 'params' => array('size'=>'50x50')),
+		'model' => 'admin/user_model',
+		'action' => 'user_id',
+		'align' => 'center',
+		'width' => 150
+	],
+];
+
+// Show sample method called in table field
+Class User_model extends MP_Model
+{
+	.
+	.
+	.
+    public function get_user_thumbnail($params){
+	
+		// the "$params" arg is one row data + your custom params that you defined
+        $id = $params['user_id'];
+		
+		// this is custom param
+        $size = isset($params['size']) ? $params['size'] : '50x50';
+		.
+		.
+		.
+    }
+</pre>
+
+
+### 4- last_row
+
+<p>You can set some last row for your table that need to be calculate data in your custom method.</p>
+<pre>
+$this->load->library('pd_list', array(
+	'table' => 'ci_user t1',
+	
+	'last_row' => [
+		// You can set static mode and pass your html in "content" param
+		[ 'type'=>'static','content'=>'<tr><td>...</td></tr>' ],
+		
+		// You can set dynamic mode and fill "method" and "model" params for calculate your html
+		[ 'type'=>'dynamic','method'=>'get_user_footer_info', 'model' => 'admin/user_model', 'params'=>array('length'=>$last_row_lenght, 'state'=>$transaction_state) ]
+	]
+	.
+	.
+	.
+</pre>
+
+
+### 5- ident
+
+<p>You have to set your identify field of database table in this field.</p>
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'ident' => 'user_id',
+		.
+		.
+		.
+</pre>
+
+
+### 5- where
+
+<p>You have two where param to handle your condition in query.</p>
+<p>First one is "where" that need to passing array params.</p>
+<p>Second one is "where_custom" that need to passing string param.</p>
+<pre>
+// you can see both where condition in this sample
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'where' =>  [
+			['t1.user_state'=>1],
+			['t2.user_detail_state'=>1]
+		]
+		'where_custom' => 'EXISTS (select 1 FROM pd_user u WHERE t1.user_id=u.user_id AND user_state<>1'
+		.
+		.
+		.
+</pre>
+
+
+### 6- order
+
+<p>For using Order by in your query pass the array to this param.</p>
+
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'order' =>  [
+			['t1.user_id'=> 'ASC'],
+			['t2.user_detail_id'=> 'DESC']
+		]
+		.
+		.
+		.
+</pre>
+
+
+### 7- group
+
+<p>For using Group by in your query pass the string to this param.</p>
+
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'group' =>  't1.user_id'
+		.
+		.
+		.
+</pre>
+
+
+### 8- search
+
+<p>We have search box for your data table in top of table that configuring in this param.</p>
+<p>You can use "CONCAT" in this option for searching too.</p>
+
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'search' =>  [
+			['شناسه' => 't1.user_id'],
+			['نام یا موبایل' => 'CONCAT(t1.user_id, " ", t1.user_phone)']
+		]
+		.
+		.
+		.
+</pre>
+
+
+### 8- action_link
+
+<p>We have ability to creating any custom action link for each row of data and you have to pass array to this param.</p>
+<p>The list builder library has default action links that you can using from them.</p>
+
+<pre>
+$action_link = [];
+$action_link[] = [
+	'title' => 'برای ویرایش فیلد کلیک کنید', // for title of button
+	'name' => 'ویرایش', // for content name of button
+	'icon' => 'fa-edit',
+	'color' => 'btn-warning custom-class',
+	'class' => 'edit-class',
+	'link' => 'user/edit/@id@', // library automatically replace row identify inserted to "@id@" characters
+	'target' => '_blank', // target of link action that default value is "_self"
+	'translate' => 'enc', // you can encrypt your identifier in "link" param
+]
+
+// translate has  4 type "enc", "md5", "comp", "nope"
+// "enc" => Non-return encryption of  identifier
+// "md5" => Reversible encryption data that you can decrypt it in server with your key if you have
+// "comp" => just compress identifier that you can decompress the text at server side
+// "nope" => no encryption action to doing with identifier.  that is default value if you leave param
+
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'action_link' =>  $action_link
+		.
+		.
+		.
+</pre>
+
+<p>List builder library has default action links for decrease coding time of developer.</p>
+<pre>
+$action_link = [];
+$action_link[] = [
+	['link'=>'edit/@id@','type'=>'edit'],
+	['link'=>'@id@','type'=>'delete'], // just update the state field of table to 10, means is deleted for user but you can see that.
+	['link'=>'@id@','type'=>'full-delete'], // remove data from database
+	['link'=>'@id@','type'=>'view']
+]
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'action_link' =>  $action_link
+		.
+		.
+		.
+</pre>
+
+
+### 9- limit
+
+<p>You can set limit for showing data in list and the other data is beeing on pagination.</p>
+<p>If you dont like showing pagination html content and limit condition you can set "limit_box" to false.</p>
+
+<pre>
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'limit' =>  150 // default limit is 10
+		.
+		.
+		. 
+</pre>
+
+
+### 10- before_delete
+
+<p>Maybe you want to handle some actions before delete your data in list, so you can use this param by array setting.</p>
+<p>You have to define method and model of your handler action like below sample.</p>
+
+<pre>
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'before_delete' => ['function' => 'before_delete_user_row', 'params' => array('state' => 'user_row'), 'model'=>'user/user_model']
+		.
+		.
+		.
+		
+	
+// Show sample method called in "before_delete" table field
+Class User_model extends MP_Model
+{
+	.
+	.
+	.	
+		
+    public function before_delete($params){
+		
+		// "$params" variable is array and has these structure::
+		// $params = [
+		// 	 'base' => [...], // your custom params if you set in list initiallize param that is
+		//	 'db' => [...], // selected rows from client in interface that are array mode
+		//	 'full_delete' => 0 or 1  // if you set "full_delete" params 1 or "true" means all of delete request are full-delete and want to remove row from database
+		// ]
+		
+        foreach($params['db'] as $param_row) {
+			
+			// do your actions
+			.
+			.
+			.
+        }
+		// if you dont have any error
+        return array('error'=>0);
+    }
+		
+</pre>
+
+<p>If you dont have any error, return below array to compelete action.</p>
+<pre>
+ return ['error' => 0];
+</pre>
+
+<p>If you have any errors in your actions, then return below array to showing user client errors and canceling the action.</p>
+<pre>
+ return ['error' => 1, 'msg' => 'این کاربر دارای یک خرید تکمیل نشده است'];
+</pre>
+
+
+### 11- filter
+
+<p>If you dont want any filtering in data table so set "filter_box" false, default of "filter_box" is true.</p>
+<p>If you want to set filter boxes in top of header you have to fill this param like below sample.</p>
+
+<pre>
+
+$filter = [];
+$filter[] = [
+	'name' => 'Filter by Activate State',
+	'action' => 'user_state',
+	'data' => [1 => 'Active' , 0 => 'Deactive']
+];
+$filter[] = [
+	'name' => 'Filter by User Fullname',
+	'action' => 'user_fullname',
+	'data' => [1006 => 'Ali' , 500 => 'Ahmad', ...]
+];
+
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'filter' => $filter 
+		.
+		.
+		.
+		
+		
+</pre>
+
+
+### 12- table_empty_first
+
+<p>If you set true this param, list data will be empty on first view of page loading.</p>
+
+
+### 13- disable_form
+
+<p>If you set true this param, list builder do not create form element for your list.</p>
+
+<pre>
+
+$filter = [];
+$filter[] = [
+	'name' => 'Filter by Activate State',
+	'action' => 'user_state',
+	'data' => [1 => 'Active' , 0 => 'Deactive']
+];
+$filter[] = [
+	'name' => 'Filter by User Fullname',
+	'action' => 'user_fullname',
+	'data' => [1006 => 'Ali' , 500 => 'Ahmad', ...]
+];
+
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'filter' => $filter 
+		.
+		.
+		.
+		
+		
+</pre>
+
+### 14- header_button, header_text, header_box // footer_button, footer_text, footer_box
+
+<p>With "header_button" param you can create buttons on top of your list for doing some action like linking to other pages.</p>
+<p>With "header_text" param you can show string content helping on top of your list for information of list or other plan.</p>
+<p>If you set "false" the "header_box" param, the header box content canceled.</p>
+<p>All of footer params are like header. but will be creating in footer of table.</p>
+
+<pre>
+$header_button = [];
+$header_button[] = [
+	'class' => 'custom_element_class',
+	'id' => 'custom_element_id',
+	'color' => 'custom_element_color',
+	'link' => 'http://domain.com/user/create',
+	'size' => 'small',
+	'attr' => 'data-toggle="tooltip" data-title="title of this button"',
+	'text' => '<i class="fa fa-plus"></i> افزودن کاربر جدید'
+];
+
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'header_button' => $header_button, 
+		'header_text' => 'برای درج کاربر جدید از لینک زیر میتوانید استفاده کنید.', 
+		.
+		.
+		.
+</pre>
+
+### 15- field_checkbox
+
+<p>If you set "true" this param, list builder library will be creating checkbox element in first column of each row for selecting the rows.</p>
+<p>Default value of this param is "true".</p>
+
+<pre>
+$header_button = [];
+$header_button[] = [
+	'class' => 'custom_element_class',
+	'id' => 'custom_element_id',
+	'color' => 'custom_element_color',
+	'link' => 'http://domain.com/user/create',
+	'size' => 'small',
+	'attr' => 'data-toggle="tooltip" data-title="title of this button"',
+	'text' => '<i class="fa fa-plus"></i> افزودن کاربر جدید'
+];
+
+
+$this->load->library('pd_list', array(
+		'table' => 'ci_user t1 INNER JOIN ci_user_detail t2 USING (user_id)',
+		'header_button' => $header_button, 
+		'header_text' => 'برای درج کاربر جدید از لینک زیر میتوانید استفاده کنید.', 
+		.
+		.
+		.
+</pre>
+
+## All list Options
+
+<p>Here is All of List builder library options.</p>
 <pre>
 array(
 		'table_ident'		=> 0, // number of table for separate multi tables in one page
@@ -600,29 +1081,56 @@ array(
 		'group' 		 	=> '', // set group by in query
 		'search' 		 	=> array(),// search field
 		'action_link' 	 	=> array(	array('link'=>'edit/@id@','type'=>'edit'),array('link'=>'@id@','type'=>'delete')),
-		'action_form' 	 	=> 'list',
-		'action_form_custom'=> '',
+		'action_form' 	 	=> 'list', // list from element action
 		'limit'          	=> 0, // limit for your select
-		'limit_box'      	=> true,
-		'before_delete'	 	=> 0,
-		'filter'	 	 	=> array(),//array('action'=>'field_name','html'=>'html_content')
-		'filter_box'	 	=> true,
-		'table_empty_first'	=> false,
-		'disable_form'		=> false,
-		'header_box'	 	=> true,
-		'header_text'	 	=> ' به منظور اضافه کردن سطر جدید از طریق لینک زیر اقدام کنید',
+		'limit_box'      	=> true, // limit & pagination box show state
+		'before_delete'	 	=> 0, // before delete action
+		'filter'	 	 	=> array(), // list filter array
+		'filter_box'	 	=> true, // list filter box element show state
+		'table_empty_first'	=> false, // showing table empty at loading the list
+		'disable_form'		=> false, // disable to create form element for list
+		'header_box'	 	=> true, // header box element show state
+		'header_text'	 	=> ' به منظور اضافه کردن سطر جدید از طریق لینک زیر اقدام کنید', // header box text for helping string
 		'header_button'	 	=> array(
 			array('txt'=>'<i class="fa fa-plus"></i> اضافه کردن سطر جدید', 'color'=>'primary', 'url'=>$this->module_path),
 			array('txt'=>'<i class="fa fa-trash"></i> حذف گروهی آیتم ها', 'color'=>'red', 'id'=>'delete-all', 'url'=>$this->module_path)
 		),
-		'field_checkbox'    => true,
-		'footer_box'	 	=> false,
-		'footer_text'	 	=> '',
-		'footer_button'	 	=> array()
+		'field_checkbox'    => true, // showing checkbox first column of each row for selecting
+		'footer_box'	 	=> false, // footer box element show state
+		'footer_text'	 	=> '',// footer box text for helping string
+		'footer_button'	 	=> array() 
 	);
 </pre>
 
 
+# Helper Library
+
+<p>The helper libraries can decrease coding time of developers in several situation like validation, timing compare and calculate and etc.</p>
+
+
+## Tools Helper
+
+<p>In this helper library we collected some method for helping to fast access to code and decrease coding time.</p>
+
+## Validation Helper
+
+<p>Validation helper is collection of variable validate, client data validation and etc that calculate by Regular Expression technology.</p>
+
+## Persian Date Helper
+
+<p>We forked a <a href="http://jdf.scr.ir" target="_blank">Persian Library</a> of date time converter for persian language in codeigniter.</p>
+<p>We collected other methods like getting first or last day of the week or month and etc too.</p>
 
 
 
+# Requirements
+
+- <p>PHP version 5.6 or newer is recommended.</p>
+
+- <p>Mcrypt extention for tools helper library.</p>
+
+
+# Installation
+
+<p>Install codeigniter 3.x from main source <a href="https://codeigniter.com/user_guide" target="_blank">User guide</a></p>
+<p>After that copy and replace "application" and "assets" folders in main root of site.</p>
